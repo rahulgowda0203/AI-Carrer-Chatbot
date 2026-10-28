@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CareerMate AI | Career Assistant</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-icon">C</div><div><strong>CareerMate</strong><small>AI CAREER ASSISTANT</small></div></div>
+    <div class="side-label">WORKSPACE</div>
+    <button class="nav-item active" data-view="chat"><span>◉</span> AI Career Chat</button>
+    <button class="nav-item" data-view="careers"><span>✧</span> Career finder</button>
+    <button class="nav-item" data-view="roadmap"><span>⌁</span> Learning roadmap</button>
+    <button class="nav-item" data-view="resume"><span>▤</span> Resume review</button>
+    <button class="nav-item" data-view="interview"><span>◇</span> Interview practice</button>
+    <button class="nav-item" data-view="jobs"><span>↗</span> Jobs & internships</button>
+    <div class="sidebar-bottom"><div class="online-dot"></div><div><b>Career guidance</b><small>Plan your next step</small></div></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><div class="eyebrow">YOUR PERSONAL CAREER GUIDE</div><h1 id="page-title">Good afternoon 👋</h1><p id="page-subtitle">Let's make your next career move clearer.</p></div>
+      <div class="profile"><div class="avatar">S</div><div><b>Student workspace</b><small>{% if ai_ready %}AI connected{% else %}Demo mode{% endif %}</small></div></div>
+    </header>
+
+    <section class="stats-grid">
+      <div class="stat-card"><div class="stat-icon lilac">✧</div><div><span>Career exploration</span><strong>Find your fit</strong><small>Match skills to roles</small></div></div>
+      <div class="stat-card"><div class="stat-icon mint">⌁</div><div><span>Learning plan</span><strong>Build skills</strong><small>One step at a time</small></div></div>
+      <div class="stat-card"><div class="stat-icon peach">↗</div><div><span>Career readiness</span><strong>Take action</strong><small>Projects and practice</small></div></div>
+    </section>
+
+    <section class="view active" id="view-chat">
+      <div class="section-heading"><div><h2>AI Career Assistant</h2><p>Ask about career paths, skills, courses, projects, or placements.</p></div><span class="status-pill"><i></i>{% if ai_ready %}Hugging Face enabled{% else %}Demo mode{% endif %}</span></div>
+      <div class="chat-layout">
+        <div class="chat-card">
+          <div class="chat-top"><div class="bot-avatar">✦</div><div><b>CareerMate AI</b><small><span class="green-dot"></span> Here to help you plan</small></div><button id="clear-chat" class="icon-button" title="Clear chat">↻</button></div>
+          <div class="chat-messages" id="chat-messages">
+            {% if history %}
+              {% for item in history %}
+              <div class="message {{ 'user' if item.role == 'user' else 'bot' }}"><div class="bubble">{{ item.content }}</div></div>
+              {% endfor %}
+            {% else %}
+              <div class="message bot"><div class="bubble">Hi! I'm CareerMate, your career planning assistant. 🌱<br><br>Tell me what you enjoy, what skills you have, or what job you're curious about. We'll work through it together.</div></div>
+            {% endif %}
+          </div>
+          <div class="suggestions"><button class="suggestion">Which career suits my skills?</button><button class="suggestion">Make me a learning roadmap</button><button class="suggestion">Help me prepare for interviews</button></div>
+          <form id="chat-form" class="chat-input"><textarea id="chat-input" rows="1" maxlength="5000" placeholder="Ask anything about your career..." required></textarea><button type="submit" class="send-button" aria-label="Send message">➤</button></form>
+          <div class="fine-print">AI can make mistakes. Verify important career and job information.</div>
+        </div>
+        <div class="right-column">
+          <div class="tip-card"><div class="tip-top"><span>✦</span> CAREER TIP</div><h3>Small projects create big opportunities.</h3><p>Choose one skill you want to improve and build a small project that proves you can use it.</p><button data-go="roadmap" class="text-link">Build my roadmap →</button></div>
+          <div class="quick-card"><h3>Quick actions</h3><button data-go="careers"> <span class="quick-icon">✧</span><span><b>Explore careers</b><small>Find roles that fit you</small></span><span class="arrow">→</span></button><button data-go="resume"><span class="quick-icon">▤</span><span><b>Review my resume</b><small>Get improvement ideas</small></span><span class="arrow">→</span></button><button data-go="interview"><span class="quick-icon">◇</span><span><b>Practice interviews</b><small>Build confidence</small></span><span class="arrow">→</span></button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-careers">
+      <div class="section-heading"><div><h2>Career finder</h2><p>Explore roles based on your interests and skills.</p></div></div>
+      <div class="tool-card"><form id="career-form" class="form-grid"><label>What topics interest you?<textarea id="interests" rows="3" placeholder="e.g. AI, building websites, solving problems, data"></textarea></label><label>Skills you already know <span class="muted">(comma-separated)</span><input id="skills" placeholder="e.g. Python, HTML, SQL"></label><button class="primary-button" type="submit">Find career matches →</button></form></div>
+      <div id="career-results" class="results-grid"></div>
+    </section>
+
+    <section class="view" id="view-roadmap">
+      <div class="section-heading"><div><h2>Learning roadmap</h2><p>Turn your career goal into a practical learning plan.</p></div></div>
+      <div class="tool-card"><form id="roadmap-form" class="form-grid"><label>Target career<input id="roadmap-role" value="AI / Machine Learning Engineer" required></label><label>Your current level<select id="roadmap-level"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></label><button class="primary-button">Create my roadmap →</button></form></div>
+      <div class="output-card hidden" id="roadmap-output"></div>
+    </section>
+
+    <section class="view" id="view-resume">
+      <div class="section-heading"><div><h2>Resume review</h2><p>Get actionable suggestions to improve your resume.</p></div></div>
+      <div class="tool-card"><div class="notice">Privacy tip: remove your phone number, home address, and other personal information before uploading. Files are processed for this request and are not saved by this app.</div><form id="resume-form" class="form-grid"><label>Target role<input name="role" value="Entry-level software or AI role"></label><label class="upload-box"> <span class="upload-icon">↑</span><b>Choose your resume</b><small>PDF or TXT · Maximum 5 MB</small><input type="file" name="resume" accept=".pdf,.txt" required></label><button class="primary-button">Review resume →</button></form></div>
+      <div class="output-card hidden" id="resume-output"></div>
+    </section>
+
+    <section class="view" id="view-interview">
+      <div class="section-heading"><div><h2>Interview practice</h2><p>Prepare for common questions and technical conversations.</p></div></div>
+      <div class="tool-card"><form id="interview-form" class="form-grid"><label>Target role<input id="interview-role" value="Software Engineer" required></label><label>Experience level<select id="interview-level"><option>Entry level</option><option>Internship</option><option>Experienced</option></select></label><button class="primary-button">Generate practice questions →</button></form></div>
+      <div class="output-card hidden" id="interview-output"></div>
+    </section>
+
+    <section class="view" id="view-jobs">
+      <div class="section-heading"><div><h2>Jobs & internships</h2><p>Search external portals for current opportunities. Always verify the listing and employer.</p></div></div>
+      <div class="tool-card"><form id="jobs-form" class="form-grid"><label>Role or keyword<input id="job-role" value="AI internship" required></label><button class="primary-button">Find job search links →</button></form></div>
+      <div id="jobs-results" class="jobs-grid"></div>
+      <div class="notice">These links open searches on third-party portals. This starter app does not scrape listings or verify vacancies.</div>
+    </section>
+    <footer>CareerMate AI <span>•</span> Built to help you learn, explore, and grow.</footer>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
